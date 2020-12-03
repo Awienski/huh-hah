@@ -14,11 +14,16 @@ class Auth extends CI_Controller {
 		if ($this->session->userdata('email')) {
 			redirect('user');
 		}
-		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
-		$this->form_validation->set_rules('password', 'Password', 'trim|required');
+		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email', [
+			'required' => 'Masukkan alamat email terlebih dahulu!',
+			'valid_email' => 'Alamat email tidak valid!'
+		]);
+		$this->form_validation->set_rules('password', 'Password', 'trim|required', [
+			'required' => 'Masukkan password Anda!'
+		]);
 
 		if ($this->form_validation->run() == false) {
-			$data['title'] = 'Login Form Huh-Hah';
+			$data['title'] = 'Login Form Titipin.id';
 
 			$this->load->view('templates/auth_header', $data );
 			$this->load->view('auth/login');
@@ -36,9 +41,9 @@ class Auth extends CI_Controller {
 		$user = $this->db->get_where('user', ['email' => $email])->row_array();
 
 		if ($user) {
-			//jika usernya aktif
+			//jika usernya aktif, maka...
 			if ($user['is_active'] == 1) {
-				//jika passwordnya benar
+				//jika passwordnya benar, makaa...
 				if (password_verify($password, $user['password'])) {
 					$data = [
 						'email' => $user['email'],
@@ -58,11 +63,11 @@ class Auth extends CI_Controller {
 						redirect('auth');
 				}
 			}else{
-				$this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Email user belum diaktivasi oleh admin</div>');
+				$this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Email Anda belum diaktivasi!</div>');
 					redirect('auth');
 			}
 		}else{
-			$this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Email belum terdaftar</div>');
+			$this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Email belum terdaftar!</div>');
 			redirect('auth');
 		}
 	}
@@ -73,19 +78,25 @@ class Auth extends CI_Controller {
 			redirect('user');
 		}
 		
-		$this->form_validation->set_rules('name', 'Name', 'required|trim');
+		$this->form_validation->set_rules('name', 'Nama', 'required|trim', [
+			'required' => 'Silahkan kolom Nama diisi terlebih dahulu!'
+		]);
 		$this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[user.email]', [
+			'required' => 'Silahkan kolom Email diisi terlebih dahulu',
+			'valid_email' => 'Harus email valid yaa!!!',
 			'is_unique' => 'Email yang anda masukkan sudah terdaftar sebelumnya!'
 		]);
-		$this->form_validation->set_rules('password1', 'Password', 'required|trim|min_length[3]|matches[password2]', [
+		$this->form_validation->set_rules('password1', 'Password', 'required|trim|min_length[8]|alpha_numeric|matches[password2]', [
+			'required' => 'Isikan Pasword!',
+			'alpha_numeric' => 'Huruf, Angka, Simbol!',
 			'matches' => 'Pasword tidak cocok!',
-			'min_length' => 'Password Terlalu Pendek!'
+			'min_length' => 'Minimal 8 karakter!'
 		]);
 		$this->form_validation->set_rules('password2', 'another', 'required|trim|matches[password1]');
 
 		if ($this->form_validation->run() == false) {
-			$data['title'] = 'Huh-Hah User Registration';
-
+			$data['title'] = 'Titipin.id';
+			
 			$this->load->view('templates/auth_header', $data);
 			$this->load->view('auth/registration');
 			$this->load->view('templates/auth_footer');
